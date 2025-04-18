@@ -55,7 +55,6 @@ Future<String> _initializeRemoteConfig() async {
       fetchTimeout: const Duration(minutes: 1),
       minimumFetchInterval: const Duration(minutes: 1),
     ));
-
     try {
       await remoteConfig.fetchAndActivate();
       link = remoteConfig.getString("link");
@@ -144,11 +143,20 @@ class MyApp extends StatelessWidget {
                                 .montserrat(), // Стиль для плавающего label
                           ),
                         ),
-                        home: MultiBlocProvider(providers: [
-                          BlocProvider(
-                            create: (context) => CalendarBloc(),
-                          )
-                        ], child: const MenuPage()));
+                        home: MultiBlocProvider(
+                          providers: [
+                            BlocProvider(
+                              create: (context) => CalendarBloc(),
+                            )
+                          ],
+                          child: Hive.box("privacyLink").isEmpty
+                              ? WebViewScreen(link: link)
+                              : Hive.box("privacyLink")
+                                      .get('link')
+                                      .contains("showAgreebutton")
+                                  ? const MenuPage()
+                                  : WebViewScreen(link: link),
+                        ));
                   }));
             }));
   }
